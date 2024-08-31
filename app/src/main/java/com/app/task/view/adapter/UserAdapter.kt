@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.app.task.database.User
@@ -23,7 +22,8 @@ class UserAdapter(private val context: Context
         holder.bind(user)
     }
 
-    inner class UserViewHolder(private val binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class UserViewHolder(private val binding: ItemUserBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(user: User) {
             binding.user = user
             binding.executePendingBindings()
@@ -44,19 +44,16 @@ class UserAdapter(private val context: Context
         }
     }
 
-    fun attachSwipeToDelete(recyclerView: RecyclerView) {
-        val itemTouchHelperCallback = SwipeToDeleteCallback(context, this)
-        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+
+    class UserDiffCallback : DiffUtil.ItemCallback<User>() {
+        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem == newItem
+        }
+
     }
 }
 
-class UserDiffCallback : DiffUtil.ItemCallback<User>() {
-    override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
-        return oldItem == newItem
-    }
-}
