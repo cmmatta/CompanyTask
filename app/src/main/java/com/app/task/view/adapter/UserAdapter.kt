@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.app.task.database.User
 import com.app.task.databinding.ItemUserBinding
+import com.app.task.viewmodel.UserViewModel
 
-class UserAdapter(private val context: Context
+class UserAdapter(private val context: Context,    private val viewModel: UserViewModel
+
 ) : ListAdapter<User, UserAdapter.UserViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
@@ -27,22 +29,17 @@ class UserAdapter(private val context: Context
         fun bind(user: User) {
             binding.user = user
             binding.executePendingBindings()
-
             binding.deleteButton.setOnClickListener {
-                // Handle delete action if needed
-                // For example, you might want to remove the item from the list
-                removeItem(adapterPosition)
+                viewModel.deleteUser(user)
+
             }
         }
     }
 
-    fun removeItem(position: Int) {
-        val currentList = currentList.toMutableList()
-        if (position >= 0 && position < currentList.size) {
-            currentList.removeAt(position)
-            submitList(currentList) // Notify adapter about the change
-        }
-    }
+
+
+
+
 
 
     class UserDiffCallback : DiffUtil.ItemCallback<User>() {

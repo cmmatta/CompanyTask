@@ -33,7 +33,7 @@ class LoginViewModel : ViewModel() {
         val emailValue = email.value
         val passwordValue = password.value
 
-        // Dummy check for email and password, replace with actual validation
-        return emailValue == "test@example.com" && passwordValue == "123456"
+        // Dummy check for email and password
+        return emailValue == "test@gmail.com" && passwordValue == "123456"
     }
 }

@@ -16,7 +16,7 @@ import com.app.task.viewmodel.LoginViewModel
 
 
 class LoginFragment : Fragment() {
-    private lateinit var viewModel: LoginViewModel
+    private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: FragmentLoginBinding
 
     override fun onCreateView(
@@ -24,21 +24,26 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-        viewModel.loginEvent.observe(viewLifecycleOwner, Observer { success ->
-            if (success) {
-                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
-            } else {
-                Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
-            }
-        })
-
+        setupViewModel()
+        setupObservableModel()
         return binding.root
     }
 
+    private fun setupObservableModel() {
+        loginViewModel.loginEvent.observe(viewLifecycleOwner, Observer { success ->
+            if (success) {
+                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+            } else {
+                Toast.makeText(context, R.string.invalid_cred, Toast.LENGTH_SHORT).show()
+            }
+        })    }
 
-    }
+    private fun setupViewModel() {
+        loginViewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+        binding.viewModel = loginViewModel
+        binding.lifecycleOwner = viewLifecycleOwner    }
+
+
+}
 
 

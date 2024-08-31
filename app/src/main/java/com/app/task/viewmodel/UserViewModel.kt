@@ -6,11 +6,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.app.task.R
 import com.app.task.database.User
 import com.app.task.database.UserDatabase
-
 import com.app.task.repository.UserRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -23,9 +25,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val _navigationCommand = MutableLiveData<Boolean>()
     val navigationCommand: LiveData<Boolean> get() = _navigationCommand
 
-
-
-
+    private val _showToast = MutableLiveData<Boolean>()
+    val showToast: LiveData<Boolean> get() = _showToast
 
 
     private val userRepository: UserRepository
@@ -34,20 +35,39 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         val userDao = UserDatabase.getDatabase(application).userDao()
         userRepository = UserRepository(userDao)
         allUsers = userRepository.getAllUsers()
-//        isUserListEmpty = Transformations.map(allUsers) { userList ->
-//            userList.isEmpty()
-//        }
+    }
 
+    fun deleteUser(user: User) {
+        viewModelScope.launch {
+            try {
+                userRepository.deleteUser(user)
+                _toastMessage.value = getApplication<Application>().getString(R.string.deleted)
+                _showToast.value = true
 
+            } catch (e: Exception) {
+                _toastMessage.value = "Error deleting user: ${e.message}"
+                _showToast.value = true
+
+            }
+        }
+    }
+
+    fun onToastShown() {
+        _showToast.value = false
     }
 
     fun addUser(name: String, email: String, password: String) {
         val user = User(name = name, email = email, password = password)
         viewModelScope.launch {
-            userRepository.insertUser(user)
+            try {
+                userRepository.insertUser(user)
+                _toastMessage.postValue(getApplication<Application>().getString(R.string.user_added))
+                _navigationCommand.postValue(true)
+            } catch (e: Exception) {
+                _toastMessage.postValue("Error adding user: ${e.message}")
+            }
         }
     }
-
 
     fun onSaveButtonClick() {
         val nameValue = name.value.orEmpty()
@@ -56,15 +76,13 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
         when {
             nameValue.isEmpty() || emailValue.isEmpty() || passwordValue.isEmpty() -> {
-                _toastMessage.value = "Please fill all fields"
+                _toastMessage.postValue(getApplication<Application>().getString(R.string.fill_all))
             }
             !isValidEmail(emailValue) -> {
-                _toastMessage.value = "Invalid email format"
+                _toastMessage.postValue(getApplication<Application>().getString(R.string.invalid_email))
             }
             else -> {
                 addUser(nameValue, emailValue, passwordValue)
-                _toastMessage.value = "User added successfully"
-                _navigationCommand.value = true
             }
         }
     }
@@ -74,7 +92,4 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-
 }
-
-

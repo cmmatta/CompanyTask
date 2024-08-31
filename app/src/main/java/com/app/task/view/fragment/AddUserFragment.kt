@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.app.task.databinding.FragmentAddUserBinding
 import com.app.task.viewmodel.UserViewModel
 import android.util.Patterns
+import androidx.lifecycle.Observer
 import com.app.task.R
 
 class AddUserFragment : Fragment() {
@@ -22,32 +23,25 @@ class AddUserFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentAddUserBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-
-//        binding.saveButton.setOnClickListener {
-//            val name = binding.etName.text.toString()
-//            val email = binding.etEmail.text.toString()
-//            val password = binding.etPassword.text.toString()
-//
-//            if (name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
-//                if (isValidEmail(email)) {
-//                    viewModel.addUser(name, email, password)
-//                    Toast.makeText(requireContext(), R.string.user_added, Toast.LENGTH_SHORT).show()
-//                    findNavController().navigateUp()
-//                } else {
-//                    Toast.makeText(requireContext(), R.string.invalid_email, Toast.LENGTH_SHORT).show()
-//                }
-//            } else {
-//                Toast.makeText(requireContext(), R.string.fill_all, Toast.LENGTH_SHORT).show()
-//            }
-//        }
-
+        setupViewModel()
+        setupObservableModel()
         return binding.root
     }
 
-//    private fun isValidEmail(email: String): Boolean {
-//        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-//    }
+    private fun setupObservableModel() {
+        viewModel.toastMessage.observe(viewLifecycleOwner, Observer { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        })
+        viewModel.navigationCommand.observe(viewLifecycleOwner, Observer { shouldNavigate ->
+            if (shouldNavigate) {
+                findNavController().popBackStack()
+            }
+        })    }
+
+    private fun setupViewModel() {
+        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner    }
+
+
 }
